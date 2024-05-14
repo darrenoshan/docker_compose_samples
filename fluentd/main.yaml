@@ -1,0 +1,17 @@
+version: '3'
+networks:
+  services:
+    name: services
+    ipam:
+      config:
+        - subnet: 172.16.1.0/24
+          ip_range: 172.16.1.0/24
+          gateway: 172.16.1.1
+services:
+  fluent:
+    image: fluent/fluentd:latest
+    container_name: mon_fluent
+    restart: unless-stopped
+    ports:
+    - "0.0.0.0:518:24224"
+    - "0.0.0.0:518:24224/udp"

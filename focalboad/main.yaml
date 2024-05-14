@@ -1,0 +1,20 @@
+version: '3'
+networks:
+  services:
+    name: services
+    ipam:
+      config:
+        - subnet: 172.16.1.0/24
+          ip_range: 172.16.1.0/24
+          gateway: 172.16.1.1
+services:
+  focalboard:
+    image: mattermost/focalboard:latest
+    container_name: focalboard
+    restart: unless-stopped
+    ports:
+        - '0.0.0.0:192:8000'
+    volumes:
+      - ./focalboard:/opt/focalboard/data
+    networks:
+      - services

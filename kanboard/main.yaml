@@ -1,0 +1,39 @@
+version: '3'
+networks:
+  services:
+    name: services
+    ipam:
+      config:
+        - subnet: 172.16.1.0/24
+          ip_range: 172.16.1.0/24
+          gateway: 172.16.1.1
+services:
+  kanboard:
+    image: kanboard/kanboard:latest
+    container_name: kanboard
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:8081:80"
+    volumes:
+      - ./kanboard/kanboard_data:/var/www/app/data
+      - ./kanboard/kanboard_plugins:/var/www/app/plugins
+      - ./kanboard/kanboard_ssl:/etc/nginx/ssl
+    environment:
+      DATABASE_URL: mysql://kanboard:kanboardpass@kanboarddb/kanboard
+      PLUGIN_INSTALLER: ture
+    networks:
+      - services
+  kanboarddb:
+    container_name: kanboarddb
+    restart: unless-stopped
+    image: mariadb:latest
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: kanboard
+      MYSQL_USER: kanboard
+      MYSQL_PASSWORD: kanboardpass
+    volumes:
+    - ./kanboard/db:/var/lib/mysql
+    networks:
+      - services
