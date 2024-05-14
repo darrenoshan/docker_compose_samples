@@ -1,0 +1,30 @@
+
+version: '3'
+networks:
+  services:
+    name: services
+    ipam:
+      config:
+        - subnet: 172.16.1.0/24
+          ip_range: 172.16.1.0/24
+          gateway: 172.16.1.1
+
+  web_dashy:
+    image: ghcr.io/lissy93/dashy
+    container_name: web_dashy
+    restart: unless-stopped
+    ports:
+    - "0.0.0.0:191:80"
+    environment:
+      - NODE_ENV=production
+      - UID=1000
+      - GID=1000
+    healthcheck:
+      test: ['CMD', 'node', '/app/services/healthcheck']
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # volumes:
+    #   - /path/to/my-config.yml:/app/public/conf.yml
+    #   - /path/to/item-icons:/app/public/item-icons

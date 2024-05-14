@@ -1,0 +1,21 @@
+version: '3'
+networks:
+  services:
+    name: services
+    ipam:
+      config:
+        - subnet: 172.16.1.0/24
+          ip_range: 172.16.1.0/24
+          gateway: 172.16.1.1
+services:
+  dashboard:
+   image: b4bz/homer:latest
+   container_name: dashboard
+   command: --default-authentication-plugin=mysql_native_password
+   restart: unless-stopped
+   volumes:
+     - ./webhost/dashboard/assets/:/www/assets
+   ports:
+     - 172.16.1.1:9004:8080
+  networks:
+    - services
