@@ -1,0 +1,35 @@
+version: '3'
+networks:
+  services:
+    name: services
+    ipam:
+      config:
+        - subnet: 172.16.1.0/24
+          ip_range: 172.16.1.0/24
+          gateway: 172.16.1.1
+services:
+  nextclouddb1:
+    image: mariadb:10.6
+    container_name: nextclouddb1
+    restart: unless-stopped
+    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
+    volumes:
+      - ./webhost/nextclouddb1:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=ROOTPASS
+      - MYSQL_PASSWORD=DBPASS
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloudDBUSER
+  nextcloud:
+    image: nextcloud
+    container_name: nextcloud
+    restart: unless-stopped
+    ports:
+      - 531:80
+    volumes:
+      - ./webhost/nextcloud:/var/www/html
+    environment:
+      - MYSQL_PASSWORD=DBPASS
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloudDBUSER
+      - MYSQL_HOST=nextclouddb1

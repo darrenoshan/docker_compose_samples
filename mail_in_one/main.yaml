@@ -1,0 +1,93 @@
+version: '3'
+networks:
+  services:
+    name: services
+    ipam:
+      config:
+        - subnet: 172.16.1.0/24
+          ip_range: 172.16.1.0/24
+          gateway: 172.16.1.1
+services:
+  mailserver:
+    image: ghcr.io/docker-mailserver/docker-mailserver:latest
+    container_name: mailserver
+    # Provide the FQDN of your mail server here (Your DNS MX record should point to this value)
+    hostname: mail.MYDOMAIN.COM
+    environment:
+      - SSL_TYPE=letsencrypt
+      - ENABLE_SPAMASSASSIN=1
+      - ENABLE_CLAMAV=1
+      - ENABLE_RSPAMD=1
+      - RSPAMD_GREYLISTING=1
+      - RSPAMD_LEARN=1
+      - ENABLE_DNSBL=1
+      - SPOOF_PROTECTION=1
+      - POSTFIX_MAILBOX_SIZE_LIMIT=1G
+      - POSTFIX_MESSAGE_SIZE_LIMIT=20M
+      - ENABLE_QUOTAS=1
+      - ENABLE_SPAMASSASSIN_KAM=1
+      # - ENABLE_OPENDKIM=0
+      # - ENABLE_OPENDMARC=0
+      # - ENABLE_POLICYD_SPF=1
+      # - SA_TAG2=1
+      # - SA_SPAM_SUBJECT=1
+      # - ENABLE_AMAVIS=1
+      # - FAIL2BAN_BLOCKTYPE=drop
+      # - ENABLE_SRS=0
+      # - POSTFIX_REJECT_UNKNOWN_CLIENT_HOSTNAME=1
+      # - POSTFIX_INET_PROTOCOLS=ipv4
+      # - POSTSCREEN_ACTION: drop
+      # - OVERRIDE_HOSTNAME: mail.example.com
+      # - FAIL2BAN_BLOCKTYPE: drop
+      # - POSTMASTER_ADDRESS: postmaster@example.com
+      # - UPDATE_CHECK_INTERVAL: 10d
+      # - POSTFIX_INET_PROTOCOLS: ipv4
+      # - MOVE_SPAM_TO_JUNK: '1'
+      # - SUPERVISOR_LOGLEVEL: warn
+      # - SPAMASSASSIN_SPAM_TO_INBOX: '1'
+    env_file: ./mail/mailserver.env
+    # More information about the mail-server ports:
+    # https://docker-mailserver.github.io/docker-mailserver/latest/config/security/understanding-the-ports/
+    # To avoid conflicts with yaml base-60 float, DO NOT remove the quotation marks.
+    ports:
+      - "0.0.0.0:25:25"    # SMTP  (explicit TLS => STARTTLS, Authentication is DISABLED => use port 465/587 instead)
+      - "0.0.0.0:143:143"  # IMAP4 (explicit TLS => STARTTLS)
+      - "0.0.0.0:465:465"  # ESMTP (implicit TLS)
+      - "0.0.0.0:587:587"  # ESMTP (explicit TLS => STARTTLS)
+      - "0.0.0.0:993:993"  # IMAP4 (implicit TLS)
+    volumes:
+      - ./lbgw/letsencrypt:/etc/letsencrypt
+      - ./mail/docker-data/mailsrv/dms/mail-data/:/var/mail/
+      - ./mail/docker-data/mailsrv/dms/mail-state/:/var/mail-state/
+      - ./mail/docker-data/mailsrv/dms/mail-logs/:/var/log/mail/
+      - ./mail/docker-data/mailsrv/dms/config/:/tmp/docker-mailserver/
+      - ./mail/certs/:/certs
+      - ./mail/config/dovecot/10-custom.conf:/etc/dovecot/conf.d/10-custom.conf
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+    stop_grace_period: 1m
+    # Uncomment if using `ENABLE_FAIL2BAN=1`:
+    # cap_add:
+    #   - NET_ADMIN
+    healthcheck:
+      test: "ss --listening --tcp | grep -P 'LISTEN.+:smtp' || exit 1"
+      timeout: 3s
+      retries: 0
+    networks:
+      - services
+  roundcubemail:
+    image: roundcube/roundcubemail:latest
+    container_name: roundcubemail
+    restart: unless-stopped
+    volumes:
+      - ./mail/docker-data/rcube/www:/var/www/html
+      - ./mail/docker-data/rcube/db/sqlite:/var/roundcube/db
+    ports:
+      - "0.0.0.0:9000:80"
+    environment:
+      - ROUNDCUBEMAIL_DB_TYPE=sqlite
+      - ROUNDCUBEMAIL_SKIN=elastic
+      - ROUNDCUBEMAIL_DEFAULT_HOST=tls://mail.MYDOMAIN.COM
+      - ROUNDCUBEMAIL_SMTP_SERVER=tls://mail.MYDOMAIN.COM
+    networks:
+      - services

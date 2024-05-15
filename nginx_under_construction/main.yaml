@@ -1,0 +1,22 @@
+version: '3'
+networks:
+  services:
+    name: services
+    ipam:
+      config:
+        - subnet: 172.16.1.0/24
+          ip_range: 172.16.1.0/24
+          gateway: 172.16.1.1
+services:
+  web_underconstruction:
+    image: nginx:latest
+    restart: unless-stopped
+    container_name: web_under_con
+    ports:
+    - "0.0.0.0:181:80"
+    volumes:
+    - ./webhost/01_undercon/site:/usr/share/nginx/html
+    - ./webhost/01_undercon/logs:/var/log/nginx/
+    - ./webhost/00_conf/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - services
