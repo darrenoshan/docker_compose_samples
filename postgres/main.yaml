@@ -1,0 +1,25 @@
+version: '3'
+networks:
+  services:
+    name: services
+    ipam:
+      config:
+        - subnet: 172.16.1.0/24
+          ip_range: 172.16.1.0/24
+          gateway: 172.16.1.1
+services:
+  scriptdb:
+    image: postgres
+    container_name: scriptdb
+    ports:
+      - "0.0.0.0:5432:5432/tcp"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_USER: postgres
+      POSTGRES_DB: scriptdb
+      POSTGRES_PASSWORD: password1
+      SERVICE_MANAGER: fsm-postgres
+    volumes:
+      - ./scriptdb_psql:/var/lib/postgresql/data:rw
+    networks:
+      - services
