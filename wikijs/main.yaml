@@ -1,0 +1,41 @@
+version: '3'
+networks:
+  services:
+    name: services
+    ipam:
+      config:
+        - subnet: 172.16.1.0/24
+          ip_range: 172.16.1.0/24
+          gateway: 172.16.1.1
+services:
+  wiki_db:
+    image: postgres:15-alpine
+    container_name: wiki_db
+    environment:
+      POSTGRES_DB: wiki
+      POSTGRES_PASSWORD: DBPASS
+      POSTGRES_USER: wikijs
+    logging:
+      driver: "none"
+    restart: unless-stopped
+    volumes:
+      - ./webhost/wikijs/wikidb:/var/lib/postgresql/data
+  networks:
+    - services
+
+  wiki_web:
+    image: ghcr.io/requarks/wiki:2
+    container_name: wiki_web
+    restart: unless-stopped
+    environment:
+      DB_TYPE: postgres
+      DB_HOST: wiki_db
+      DB_PORT: 5432
+      DB_USER: wikijs
+      DB_PASS: DBPASS
+      DB_NAME: wiki
+    ports:
+      - "0.0.0.0:190:3000"
+  networks:
+    - services
+
