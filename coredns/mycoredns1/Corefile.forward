@@ -1,0 +1,16 @@
+ mydomain.tld {
+    file /root/mydomain.db
+    log
+    errors
+}
+
+google.com {
+    forward . 8.8.8.8 9.9.9.9
+    log
+}
+
+.:53 {
+    file /root/default.db
+    log
+    errors
+}

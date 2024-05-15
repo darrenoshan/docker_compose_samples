@@ -1,0 +1,5 @@
+ mydomain.tld {
+    file /root/mydomain.db
+    log
+    errors
+}

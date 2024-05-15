@@ -8,7 +8,6 @@ networks:
           ip_range: 172.16.1.0/24
           gateway: 172.16.1.1
 services:
-
   wordpress1:
     image: wordpress:php8.2-apache
     restart: unless-stopped

@@ -1,0 +1,19 @@
+version: '3'
+networks:
+  services:
+    name: services
+    ipam:
+      config:
+        - subnet: 172.16.1.0/24
+          ip_range: 172.16.1.0/24
+          gateway: 172.16.1.1
+services:
+  mycoredns1:
+    image: coredns/coredns
+    container_name: mycoredns1
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:53:53/udp"
+    volumes:
+      - ./mycoredns1/:/root/
+    command: -conf /root/Corefile

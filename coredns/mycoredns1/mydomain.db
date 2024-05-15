@@ -1,0 +1,22 @@
+$TTL 14400
+@    IN    SOA    ns1.mydomain.tld.    root.mydomain.tld. (
+                                            20240515121800
+                                            7200
+                                            3600
+                                            1209600
+                                            180 )
+
+@	    14400	IN	NS      ns1.mydomain.tld.
+@	    14400	IN	NS	    ns2.mydomain.tld.
+ns1     14400	IN	A	    IPV4
+ns2     14400	IN	A	    IPV4
+@	    14400	IN	A	    IPV4
+www     14400	IN	A		IPV4
+ftp	    14400	IN	A		IPV4
+mail	14400	IN	A		IPV4
+smtp	14400	IN	A		IPV4
+pop	    14400	IN	A		IPV4
+imap	14400	IN	A		IPV4
+@	    14400	IN	MX	    10	mail.mydomain.tld.
+@	    14400	IN	TXT		"v=spf1 a mx ip4:IPV4 ~all"
+_dmarc	14400	IN	TXT		"v=DMARC1; p=none"
