@@ -9,7 +9,7 @@ networks:
           gateway: 172.16.1.1
 services:
   semaphore_db:
-    image: mysql:lastest
+    image: mysql:latest
     hostname: semaphore_db
     restart: unless-stopped
     volumes:
