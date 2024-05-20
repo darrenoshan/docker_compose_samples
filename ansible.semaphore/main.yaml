@@ -7,42 +7,38 @@ networks:
         - subnet: 172.16.1.0/24
           ip_range: 172.16.1.0/24
           gateway: 172.16.1.1
-services:
+services
   semaphore_db:
-    image: mysql:latest
-    hostname: semaphore_db
+    container_name: semaphore_db
     restart: unless-stopped
-    volumes:
-      - ./semaphore-mysql:/var/lib/mysql
+    image: postgres:latest
+    hostname: postgres
+    volumes: 
+     - semaphore-postgres:/var/lib/postgresql/data
     environment:
-      - MYSQL_RANDOM_ROOT_PASSWORD=yes
-      - MYSQL_DATABASE=semaphore
-      - MYSQL_USER=semaphore
-      - MYSQL_PASSWORD=secret-password
-
+     POSTGRES_USER: semaphore
+     POSTGRES_PASSWORD: semaphore
+     POSTGRES_DB: semaphore
   semaphore:
-    container_name: semaphore
-    image: semaphoreui/semaphore:latest
+    restart: unless-stopped
     ports:
       - 185:3000
+    image: semaphoreui/semaphore:latest
     environment:
-      - SEMAPHORE_DB_USER=semaphore
-      - SEMAPHORE_DB_PASS=secret-password
-      - SEMAPHORE_DB_HOST=semaphore_db
-      - SEMAPHORE_DB_PORT=3306
-      - SEMAPHORE_DB_DIALECT=mysql
-      - SEMAPHORE_DB=semaphore
-      - SEMAPHORE_PLAYBOOK_PATH=/tmp/semaphore/
-      - SEMAPHORE_ADMIN_PASSWORD=semaphoreadmin
-      - SEMAPHORE_ADMIN_NAME=semaphoreadmin
-      - SEMAPHORE_ADMIN=semaphoreadmin
-      - SEMAPHORE_ADMIN_EMAIL=admin@localhost
-      - SEMAPHORE_ACCESS_KEY_ENCRYPTION=  # access key encryption
-      - ANSIBLE_HOST_KEY_CHECKING=false  # (optional)
-    volumes:
-      - ./inventory/:/inventory:ro
-      - ./authorized-keys/:/authorized-keys:ro
-      - ./config/:/etc/semaphore:rw
-    restart: unless-stopped
+      SEMAPHORE_DB_USER: semaphore
+      SEMAPHORE_DB_PASS: semaphore
+      SEMAPHORE_DB_HOST: postgres
+      SEMAPHORE_DB_PORT: 5432
+      SEMAPHORE_DB_DIALECT: postgres
+      SEMAPHORE_DB: semaphore_db
+      SEMAPHORE_PLAYBOOK_PATH: /tmp/semaphore/
+      SEMAPHORE_ADMIN_PASSWORD: semaphoreadmin
+      SEMAPHORE_ADMIN_NAME: semaphoreadmin
+      SEMAPHORE_ADMIN_EMAIL: admin@localhost
+      SEMAPHORE_ADMIN: semaphoreadmin
+      TZ: UTC
     depends_on:
       - semaphore_db
+
+volumes:
+  semaphore-postgres:
